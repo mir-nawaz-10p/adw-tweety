@@ -32,31 +32,24 @@ for line in tweets_file:
 print "Total Tweets :", len(tweets_data)
 tweets = pd.DataFrame()
 
-tweets['text'] = map(lambda tweet: tweet['text'], tweets_data)
-tweets['lang'] = map(lambda tweet: tweet['lang'], tweets_data)
-tweets['country'] = map(lambda tweet: tweet['place']['country'] if tweet['place'] != None else None, tweets_data)
-tweets['python'] = tweets['text'].apply(lambda tweet: word_in_text('python', tweet))
-tweets['javascript'] = tweets['text'].apply(lambda tweet: word_in_text('javascript', tweet))
-tweets['ruby'] = tweets['text'].apply(lambda tweet: word_in_text('ruby', tweet))
-tweets['programming'] = tweets['text'].apply(lambda tweet: word_in_text('programming', tweet))
-tweets['tutorial'] = tweets['text'].apply(lambda tweet: word_in_text('tutorial', tweet))
-tweets['relevant'] = tweets['text'].apply(lambda tweet: word_in_text('programming', tweet) or word_in_text('tutorial', tweet))
-tweets['link'] = tweets['text'].apply(lambda tweet: extract_link(tweet))
+tweets['text'] = [tweet.get('text','') for tweet in tweets_data]
+tweets['lang'] = [tweet.get('lang','') for tweet in tweets_data]
+tweets['country'] = map(lambda tweet: tweet.get('place')['country'] if tweet.get('place') != None else None, tweets_data)
 
 tweets_by_lang = tweets['lang'].value_counts()
 fig, ax = plt.subplots()
-ax.tick_params(axis='x', labelsize=15)
+ax.tick_params(axis='x', labelsize=10)
 ax.tick_params(axis='y', labelsize=10)
 ax.set_xlabel('Languages', fontsize=15)
 ax.set_ylabel('Number of tweets' , fontsize=15)
-ax.set_title('Top 5 languages', fontsize=15, fontweight='bold')
+ax.set_title('Top 5 Tweets', fontsize=15, fontweight='bold')
 tweets_by_lang[:5].plot(ax=ax, kind='bar', color='red')
-fig.savefig('top-5-languages.png')
+fig.savefig('top-5-tweets.png')
 plt.close(fig)
 
 tweets_by_country = tweets['country'].value_counts()
 fig, ax = plt.subplots()
-ax.tick_params(axis='x', labelsize=15)
+ax.tick_params(axis='x', labelsize=10)
 ax.tick_params(axis='y', labelsize=10)
 ax.set_xlabel('Countries', fontsize=15)
 ax.set_ylabel('Number of tweets' , fontsize=15)
@@ -65,30 +58,3 @@ tweets_by_country[:5].plot(ax=ax, kind='bar', color='blue')
 fig.savefig('top-5-countries.png')
 plt.close(fig)
 
-prg_langs = ['python', 'javascript', 'ruby']
-tweets_by_prg_lang = [tweets['python'].value_counts()[True], tweets['javascript'].value_counts()[True], tweets['ruby'].value_counts()[True]]
-
-x_pos = list(range(len(prg_langs)))
-width = 0.8
-fig, ax = plt.subplots()
-plt.bar(x_pos, tweets_by_prg_lang, width, alpha=1, color='g')
-ax.set_ylabel('Number of tweets', fontsize=15)
-ax.set_title('Ranking: python vs. javascript vs. ruby (Raw data)', fontsize=10, fontweight='bold')
-ax.set_xticks([p + 0.4 * width for p in x_pos])
-ax.set_xticklabels(prg_langs)
-fig.savefig('raw-data.png')
-plt.close(fig)
-
-tweets_by_prg_lang = [tweets[tweets['relevant'] == True]['python'].value_counts()[True], 
-                      tweets[tweets['relevant'] == True]['javascript'].value_counts()[True], 
-                      tweets[tweets['relevant'] == True]['ruby'].value_counts()[True]]
-x_pos = list(range(len(prg_langs)))
-width = 0.8
-fig, ax = plt.subplots()
-plt.bar(x_pos, tweets_by_prg_lang, width,alpha=1,color='g')
-ax.set_ylabel('Number of tweets', fontsize=15)
-ax.set_title('Ranking: python vs. javascript vs. ruby (Relevant data)', fontsize=10, fontweight='bold')
-ax.set_xticks([p + 0.4 * width for p in x_pos])
-ax.set_xticklabels(prg_langs)
-fig.savefig('relevant-data.png')
-plt.close(fig)
